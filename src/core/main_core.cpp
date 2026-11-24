@@ -1,7 +1,7 @@
-#include "simulator.h"
-#include "level.h"
-#include "logger.h"
-#include "viewer_iface.h"
+#include "../../include/simulator.h"
+#include "../../include/level.h"
+#include "../../include/logger.h"
+#include "../../include/viewer_iface.h"
 #include <iostream>
 
 int main() {

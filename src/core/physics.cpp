@@ -2,3 +2,4 @@
 #include "util.h"
 
 // Movement validation and resource adjustments without structures
+
