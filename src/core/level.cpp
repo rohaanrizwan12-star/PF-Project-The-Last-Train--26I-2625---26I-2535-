@@ -201,9 +201,8 @@ bool loadInitialState(const char* filename,
 
     bool foundEnergy= false;
     bool foundline=false;
+    bool foundScore=false;
     
-
-
 
 }
 
