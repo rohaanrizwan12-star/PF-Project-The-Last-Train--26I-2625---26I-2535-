@@ -2,7 +2,7 @@
 #include "../../include/util.h"
 #include <fstream>
 #include <iostream>
-#include <fstream>
+#include <string>
 
 // Modular implementation using primitive arrays for map parsing and verification
 
@@ -94,7 +94,8 @@ bool loadBuildingMap(const char *filename,
         return false;
 
     ifstream file(filename);
-    return false;
+     if (!file)
+        return false;
 
     // Initializing the starting point of each room
 
@@ -103,14 +104,16 @@ bool loadBuildingMap(const char *filename,
     const int lastwall = 56;
 
     char borderline[MAX_LINE_LEN];
+    
+    if (!file.getline(borderline, MAX_LINE_LEN))
+        return false;
 
     for (int floor = NUM_FLOORS - 1; floor >= 0; floor--)
     {
         char layoutline[MAX_LINE_LEN] = {};
         char itemline[MAX_LINE_LEN] = {};
 
-        if (!file.getline(borderline, MAX_LINE_LEN) || !file.getline(layoutline, MAX_LINE_LEN) ||
-            !file.getline(itemline, MAX_LINE_LEN))
+        if (!file.getline(borderline, MAX_LINE_LEN) || !file.getline(layoutline, MAX_LINE_LEN) || !file.getline(itemline, MAX_LINE_LEN))
         {
             cout << "Error reading file" << endl;
             return false;
@@ -128,11 +131,11 @@ bool loadBuildingMap(const char *filename,
             int column = roomstart[gap] + roomwidth;
             char connection = layoutline[column];
 
-            if (layoutline[column - 1] == 'L' && connection == ' 1')
+            if (layoutline[column - 1] == 'L' && connection == '1')
 
-                horizontalConn[floor][gap] = CONN_LOCKED_DOOR;
+                horizontalConn[floor][gap] = CONN_NONE;
 
-            else if (connection == CONN_DOOR || connection == CONN_WINDOW || connection == CONN_SOLID_WALL || connection == CONN_SOLID_WALL)
+            else if (connection == CONN_DOOR || connection == CONN_WINDOW || connection == CONN_LOCKED_DOOR || connection == CONN_SOLID_WALL)
 
                 horizontalConn[floor][gap] = connection;
 
@@ -186,7 +189,8 @@ bool loadInitialState(const char* filename,
         return false;
 
     ifstream file(filename);
-    return false;
+    if (!file)
+        return false;
 
     string setting;
     string unusedval;
@@ -195,14 +199,109 @@ bool loadInitialState(const char* filename,
     int startingTime=0;
     int startingScore=0;
 
-    bool foungEnergy= false;
-    bool foundTime= false;
-    bool StartingScore= false;
+    bool foundenergy= false;
+    bool foundtime= false;
+    bool foundscore= false;
 
-    bool foundEnergy= false;
-    bool foundline=false;
-    bool foundScore=false;
-    
+    while (file >> setting)
+    {
+        if (setting =="INITIAL_ENERGY:")
+        {
+                if (!(file>> startingEnergy))
+                return false;
 
+                foundenergy= true;
+        }
+        else if (setting=="INITIAL_TIME:")
+        {
+                if (!(file>> startingTime))
+                return false;
+
+                foundtime= true;
+        }
+        else if (setting=="INITIAL_SCORE:")
+        {
+                if (!(file>> startingScore))
+                return false;
+
+                foundscore= true;
+        }
+        else 
+        {
+            if (!(file>> unusedval))
+                return false;
+        }
+    }
+    if (!foundenergy || !foundtime || !foundscore)
+    {
+        cout << "Error. Missing initial state settings" << endl;
+        return false;
+    }
+    energy= startingEnergy;
+    time= startingTime;
+    score= startingScore;
+
+    inventoryCount=0;
+    for(int i=0; i<MAX_INVENTORY_CAPACITY; i++)
+    {
+        inventory[i]= ENT_NONE;
+    }
+    for(int j=0; j<NUM_OBJECTIVES; j++)
+    {
+        objectives[j]= false;
+    }
+
+    emergencyTripsLeft=0;
+    return true;
 }
 
+
+bool validateStartingRoom(int startFloor, int startRoom,
+                          const char horizontalConn[NUM_FLOORS][ROOMS_PER_FLOOR - 1])
+{
+if (startFloor<1 || startFloor>NUM_FLOORS || startRoom<1 || startRoom>ROOMS_PER_FLOOR)
+{
+    cout << "Error. Invalid starting room coordinates" << endl;
+    return false;
+}
+
+int indexfloor= startFloor-1;
+
+//if there is a room on left
+if(startRoom>1)
+{
+    char leftconn= horizontalConn[indexfloor][startRoom-2];
+
+    if(leftconn==CONN_DOOR || leftconn==CONN_WINDOW)
+    {
+        return true;
+    }
+}
+
+// if there's a room on right
+
+if(startRoom<ROOMS_PER_FLOOR)
+{
+    char rightconn= horizontalConn[indexfloor][startRoom-1];
+
+    if(rightconn==CONN_DOOR || rightconn==CONN_WINDOW)
+    {
+        return true;
+    }
+}
+
+//on everyfloor room 1 has a way out
+if(startRoom==1)
+{
+    return true;
+}
+
+// there is lift from room 2 to room 3 on floor 1 and floor 2
+
+if ((startFloor==1 || startFloor==2) && (startRoom==2 || startRoom==3))
+{
+    
+    return true;    
+}
+return false;
+}
