@@ -305,3 +305,4 @@ if ((startFloor==1 || startFloor==2) && (startRoom==2 || startRoom==3))
 }
 return false;
 }
+
