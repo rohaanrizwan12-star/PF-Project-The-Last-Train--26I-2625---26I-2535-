@@ -28,9 +28,6 @@ else
 cout << "Emergency Trips Left:" << emergencyTripsLeft << endl;
 }
 
-#include <iostream>
-using namespace std;
-
 
 
 void renderRoomDetails(int floor, int room, const char roomEntities[NUM_FLOORS][ROOMS_PER_FLOOR][MAX_ENTITIES_PER_ROOM], int entityCount) {
