@@ -94,14 +94,14 @@ bool canTraverse(int targetFloor, int targetRoom, char connType,
         case '1':
             return true;
         case 'L':
-            return hasItem(inventory, inventoryCount, '<');
+            return hasItem(inventory, inventoryCount, '<'); //Checks if the player has a key for locked doors
         case '2':
             if (lift2Operational)
             {
 
-                return hasItem(inventory, inventoryCount, '(');
+                return hasItem(inventory, inventoryCount, '('); //Check if the player has a fuse for lift 2
             }
-            return emergencyTripsLeft > 0 && hasItem(inventory, inventoryCount, '$');
+            return emergencyTripsLeft > 0 && hasItem(inventory, inventoryCount, '$'); //Check if the player has an emergency card
         default:
             return false;
         
